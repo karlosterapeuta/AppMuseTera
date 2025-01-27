@@ -3,23 +3,22 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
 model User {
-  id                  String    @id @default(cuid())
-  name                String
-  email               String    @unique
-  password            String?
+  id                   String    @id @default(cuid())
+  name                 String
+  email                String    @unique
+  password             String?
   professionalRegister String?
-  image               String?
-  createdAt           DateTime  @default(now())
-  updatedAt           DateTime  @updatedAt
-  accounts            Account[]
-  sessions           Session[]
-  patients           Patient[]
+  image                String?
+  createdAt            DateTime  @default(now())
+  updatedAt            DateTime  @updatedAt
+  accounts             Account[]
+  sessions             Session[]
 }
 
 model Account {
@@ -56,19 +55,44 @@ model VerificationToken {
   @@unique([identifier, token])
 }
 
-model Patient {
-  id          String    @id @default(cuid())
+model assessments {
+  id         String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  patient_id String?   @db.Uuid
+  date       DateTime  @db.Timestamptz(6)
+  type       String
+  content    Json?
+  created_at DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  patients   patients? @relation(fields: [patient_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([date], map: "idx_assessments_date")
+  @@index([patient_id], map: "idx_assessments_patient_id")
+}
+
+model patients {
+  id          String        @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
   name        String
-  email       String?
-  phone       String?
-  birthDate   DateTime?
-  address     String?
-  city        String?
-  state       String?
-  zipCode     String?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  status      String    @default("active")
+  birth_date  DateTime?     @db.Date
+  contact     String?
+  responsible String?
+  created_at  DateTime?     @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at  DateTime?     @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  assessments assessments[]
+  sessions    sessions[]
+
+  @@index([name], map: "idx_patients_name")
+}
+
+model sessions {
+  id              String    @id @default(dbgenerated("uuid_generate_v4()")) @db.Uuid
+  patient_id      String?   @db.Uuid
+  date            DateTime  @db.Timestamptz(6)
+  notes           String?
+  emotional_state Json?
+  created_at      DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  updated_at      DateTime? @default(dbgenerated("timezone('utc'::text, now())")) @db.Timestamptz(6)
+  patients        patients? @relation(fields: [patient_id], references: [id], onDelete: Cascade, onUpdate: NoAction)
+
+  @@index([date], map: "idx_sessions_date")
+  @@index([patient_id], map: "idx_sessions_patient_id")
 }

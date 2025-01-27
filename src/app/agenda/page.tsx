@@ -36,30 +36,43 @@ export default function AgendaPage() {
     setSelectedEvent(null)
   }
 
-  return (
-    <div className="p-6">
-      <Card>
-        <div className="p-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-6">Agenda</h1>
-          
-          <div style={{ height: 'calc(100vh - 250px)' }}>
-            <Calendario
-              agendamentos={agendamentos}
-              onSelectSlot={handleSelectSlot}
-              onSelectEvent={handleSelectEvent}
-            />
-          </div>
-        </div>
-      </Card>
+  const handleSaveAgendamento = async (agendamento: Agendamento) => {
+    if (selectedEvent) {
+      await updateAgendamento(agendamento)
+    } else {
+      await addAgendamento(agendamento)
+    }
+    handleCloseModal()
+  }
 
-      <AgendamentoModal
-        isOpen={isModalOpen}
-        onClose={handleCloseModal}
-        selectedDate={selectedSlot}
-        selectedEvent={selectedEvent}
-        onSave={addAgendamento}
-        onUpdate={updateAgendamento}
-      />
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Agenda</h1>
+            <p className="mt-2 text-gray-600">Gerencie seus agendamentos e consultas</p>
+          </div>
+
+          <Card className="p-6">
+            <div style={{ height: 'calc(100vh - 250px)' }}>
+              <Calendario
+                agendamentos={agendamentos}
+                onSelectSlot={handleSelectSlot}
+                onSelectEvent={handleSelectEvent}
+              />
+            </div>
+          </Card>
+
+          <AgendamentoModal
+            isOpen={isModalOpen}
+            onClose={handleCloseModal}
+            onSave={handleSaveAgendamento}
+            selectedSlot={selectedSlot}
+            selectedEvent={selectedEvent}
+          />
+        </div>
+      </div>
     </div>
   )
-} 
+}

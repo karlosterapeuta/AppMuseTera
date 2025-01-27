@@ -5,11 +5,23 @@ import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { PatientSelect } from '@/components/processos/PatientSelect'
 import { Patient } from '@/types'
-import Link from 'next/link'
 import { AnamneseQuestion, ANAMNESE_QUESTIONS } from '@/types/anamnese'
 import { AnamnesePDF } from '@/components/processos/AnamnesePDF'
 import { useAnamneses } from '@/hooks/useAnamneses'
 import { Logo } from '@/components/Logo'
+
+function calculateAge(birthDate: Date): number {
+  const today = new Date()
+  const birth = new Date(birthDate)
+  let age = today.getFullYear() - birth.getFullYear()
+  const monthDiff = today.getMonth() - birth.getMonth()
+  
+  if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+    age--
+  }
+  
+  return age
+}
 
 export default function AnamnesePage() {
   const router = useRouter()
@@ -27,47 +39,59 @@ export default function AnamnesePage() {
             <h1 className="text-2xl font-bold text-gray-900 mb-6">Anamnese Musicoterapêutica</h1>
             
             <div className="space-y-6">
-              <div>
-                <div className="flex items-end gap-4">
-                  <div className="flex-1">
+              <div className="mb-6">
+                <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+                  <div className="w-full">
                     <PatientSelect
                       onSelect={setSelectedPatient}
                       selectedId={selectedPatient?.id}
                     />
                   </div>
-                  <Link
-                    href="/pacientes/novo"
-                    className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-flex items-center gap-2"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor"
-                    >
-                      <path
-                        fillRule="evenodd"
-                        d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                    Novo Paciente
-                  </Link>
                 </div>
               </div>
 
               {selectedPatient && (
                 <div className="mt-6">
-                  <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                    Anamnese de {selectedPatient.name}
-                  </h2>
+                  <div className="mb-4 p-4 bg-white rounded-lg shadow-sm">
+                    <h2 className="text-lg font-semibold text-gray-900 mb-2">
+                      Informações do Paciente
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div>
+                        <p className="text-sm text-gray-600">Nome:</p>
+                        <p className="font-medium">{selectedPatient.nome}</p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Data de Nascimento:</p>
+                        <p className="font-medium">
+                          {new Date(selectedPatient.dataNascimento).toLocaleDateString('pt-BR')}
+                          {' '}
+                          <span className="text-gray-500">
+                            ({calculateAge(selectedPatient.dataNascimento)} anos)
+                          </span>
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Telefone:</p>
+                        <p className="font-medium">
+                          {selectedPatient.telefone || 'Não informado'}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600">Status:</p>
+                        <p className="font-medium">
+                          {selectedPatient.status === 'active' ? 'Ativo' : 'Inativo'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
                   <AnamneseForm patient={selectedPatient} />
                 </div>
               )}
 
               {!selectedPatient && (
                 <div className="text-center py-6 text-gray-500">
-                  Selecione um paciente ou cadastre um novo para iniciar a anamnese musicoterapêutica
+                  Selecione um paciente para iniciar a anamnese musicoterapêutica
                 </div>
               )}
             </div>

@@ -1,8 +1,12 @@
 import NextAuth from 'next-auth'
 import type { AuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import { prisma } from '@/lib/prisma'
 import bcrypt from 'bcryptjs'
+import { createClient } from '@supabase/supabase-js'
+
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 const authOptions: AuthOptions = {
   providers: [
@@ -21,13 +25,13 @@ const authOptions: AuthOptions = {
 
         try {
           console.log('Buscando usuário:', credentials.email)
-          const user = await prisma.user.findUnique({
-            where: {
-              email: credentials.email.toLowerCase().trim()
-            }
-          })
+          const { data: user, error } = await supabase
+            .from('User')
+            .select('*')
+            .eq('email', credentials.email.toLowerCase().trim())
+            .single()
 
-          if (!user) {
+          if (error || !user) {
             console.log('Usuário não encontrado')
             return null
           }
@@ -59,10 +63,10 @@ const authOptions: AuthOptions = {
     })
   ],
   pages: {
-    signIn: '/auth',
-    error: '/auth'
+    signIn: '/login',
+    error: '/login'
   },
-  debug: false,
+  debug: true,
   session: {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60 // 30 dias

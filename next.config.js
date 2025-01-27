@@ -18,6 +18,9 @@ const nextConfig = {
   output: 'standalone',
   poweredByHeader: false,
   compress: true,
+  distDir: '.next',
+  generateEtags: true,
+  optimizeFonts: true,
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,

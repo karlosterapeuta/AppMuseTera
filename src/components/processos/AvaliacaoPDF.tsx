@@ -2,225 +2,341 @@
 
 import { Patient } from '@/types'
 import jsPDF from 'jspdf'
+import { ESCALA_DEMUCA } from '@/data/escalaDemuca'
+
+// Interface para os dados da avaliação
+type AvaliacaoValue = 'nao' | 'pouco' | 'muito'
+
+interface AvaliacaoData {
+  [key: string]: AvaliacaoValue
+}
 
 interface AvaliacaoPDFProps {
-  patient: Patient
-  data: Record<string, string>
+  patient: {
+    nome: string
+  }
+  data: AvaliacaoData
   observacoes: string
 }
 
-const ESCALA_DEMUCA = [
-  {
-    categoria: 'Comportamentos restritivos',
-    parametros: [
-      'Estereotipias',
-      'Agressividade',
-      'Desinteresse',
-      'Passividade',
-      'Resistência',
-      'Reclusão (isolamento)',
-      'Pirraça'
-    ],
-    escala: {
-      nao: 2,
-      pouco: 1,
-      muito: 0
-    }
-  },
-  {
-    categoria: 'Interação social / Cognição',
-    parametros: [
-      'Contato visual',
-      'Comunicação verbal',
-      'Interação com instrumentos musicais',
-      'Interação com outros objetos',
-      'Interação com educador ou musicoterapeuta',
-      'Interação com pais (se aplicável)',
-      'Interação com pares (se aplicável)',
-      'Atenção',
-      'Imitação'
-    ],
-    escala: {
-      nao: 0,
-      pouco: 1,
-      muito: 2
-    }
-  },
-  {
-    categoria: 'Percepção / Exploração rítmica',
-    parametros: [
-      'Pulso interno',
-      'Regulação temporal',
-      { nome: 'Apoio', multiplicador: 2 },
-      { nome: 'Ritmo real', multiplicador: 2 },
-      { nome: 'Contrastes de andamento', multiplicador: 2 }
-    ],
-    escala: {
-      nao: 0,
-      pouco: 1,
-      muito: 2
-    }
-  },
-  {
-    categoria: 'Percepção / Exploração sonora',
-    parametros: [
-      'Som/silêncio',
-      'Timbre',
-      'Planos de altura',
-      'Movimento sonoro',
-      'Contrastes de intensidade',
-      'Repetição de ideias rítmicas e/ou melódicas',
-      'Senso de conclusão'
-    ],
-    escala: {
-      nao: 0,
-      pouco: 1,
-      muito: 2
-    }
-  },
-  {
-    categoria: 'Exploração vocal',
-    parametros: [
-      'Vocalizações',
-      'Balbucios',
-      'Sílabas canônica',
-      { nome: 'Imitação de canções', multiplicador: 2 },
-      { nome: 'Criação vocal', multiplicador: 2 }
-    ],
-    escala: {
-      nao: 0,
-      pouco: 1,
-      muito: 2
-    }
-  },
-  {
-    categoria: 'Movimentação corporal com a música',
-    parametros: [
-      'Andar',
-      'Correr',
-      'Parar',
-      'Dançar',
-      'Pular',
-      'Girar',
-      'Balançar'
-    ],
-    escala: {
-      nao: 0,
-      pouco: 1,
-      muito: 2
-    }
-  }
-]
+// Função para classificar o desempenho
+const classificarDesempenho = (percentual: number): string => {
+  if (percentual >= 80) return 'Excelente'
+  if (percentual >= 60) return 'Adequado'
+  if (percentual >= 40) return 'Moderado'
+  if (percentual >= 20) return 'Baixo'
+  return 'Muito Baixo'
+}
 
-function calcularPontuacao(categoria: typeof ESCALA_DEMUCA[0], avaliacoes: Record<string, string>) {
-  return categoria.parametros.reduce((total, parametro) => {
-    const nome = typeof parametro === 'string' ? parametro : parametro.nome
-    const multiplicador = typeof parametro === 'string' ? 1 : parametro.multiplicador || 1
-    const valor = avaliacoes[nome]
-    if (!valor) return total
-    return total + (categoria.escala[valor as keyof typeof categoria.escala] * multiplicador)
-  }, 0)
+// Função para carregar imagem
+const loadImage = (url: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const img = new Image()
+    img.crossOrigin = 'Anonymous'
+    img.onload = () => {
+      const canvas = document.createElement('canvas')
+      canvas.width = img.width
+      canvas.height = img.height
+      const ctx = canvas.getContext('2d')
+      ctx?.drawImage(img, 0, 0)
+      resolve(canvas.toDataURL('image/png'))
+    }
+    img.onerror = reject
+    img.src = url
+  })
 }
 
 export function AvaliacaoPDF({ patient, data, observacoes }: AvaliacaoPDFProps) {
-  const handleDownload = () => {
-    const doc = new jsPDF()
-    let yPos = 20
+  const handleDownload = async () => {
+    if (!patient?.nome) return
 
-    // Configurações de fonte e tamanho
-    doc.setFont('helvetica')
-    
-    // Título
-    doc.setFontSize(18)
-    doc.text('Avaliação Musicoterapêutica', doc.internal.pageSize.getWidth() / 2, yPos, { align: 'center' })
-    yPos += 15
+    try {
+      // Carrega a logo
+      const logoDataUrl = await loadImage('/MuseTera-logo.png')
 
-    // Data e identificação
-    doc.setFontSize(10)
-    doc.text(new Date().toLocaleDateString('pt-BR'), doc.internal.pageSize.getWidth() - 20, yPos, { align: 'right' })
-    doc.text('MuseTera', doc.internal.pageSize.getWidth() - 20, yPos + 5, { align: 'right' })
-    yPos += 20
+      // Recupera os dados do profissional do localStorage
+      const profissionalData = localStorage.getItem('professional')
+      const profissional = profissionalData ? JSON.parse(profissionalData) : { nome: '', registro: '' }
 
-    // Dados do Paciente
-    doc.setFontSize(14)
-    doc.text('Dados do Paciente', 20, yPos)
-    yPos += 10
+      // Cria o documento PDF
+      const doc = new jsPDF()
+      const pageWidth = doc.internal.pageSize.getWidth()
+      const pageHeight = doc.internal.pageSize.getHeight()
+      const margin = 20
+      let yPos = margin
 
-    doc.setFontSize(12)
-    doc.text(`Nome: ${patient?.name || 'Não informado'}`, 20, yPos)
-    yPos += 7
-    doc.text(`Data de Nascimento: ${patient?.dateOfBirth ? new Date(patient.dateOfBirth).toLocaleDateString('pt-BR') : 'Não informado'}`, 20, yPos)
-    yPos += 7
-    doc.text(`Contato: ${patient?.contactInfo?.phone || 'Não informado'}`, 20, yPos)
-    yPos += 7
-    doc.text(`Status: ${patient?.status === 'active' ? 'Ativo' : 'Inativo'}`, 20, yPos)
-    yPos += 15
-
-    // Avaliação DEMUCA
-    ESCALA_DEMUCA.forEach(categoria => {
-      // Verifica se precisa adicionar nova página
-      if (yPos > doc.internal.pageSize.getHeight() - 40) {
-        doc.addPage()
-        yPos = 20
+      // Função auxiliar para verificar se precisa de nova página
+      const checkNewPage = (requiredSpace: number) => {
+        if (yPos + requiredSpace > pageHeight - margin) {
+          doc.addPage()
+          yPos = margin
+          return true
+        }
+        return false
       }
 
-      // Título da categoria
-      doc.setFontSize(14)
-      doc.text(`${categoria.categoria} - Pontuação: ${calcularPontuacao(categoria, data)}`, 20, yPos)
-      yPos += 10
-
-      // Parâmetros
-      doc.setFontSize(12)
-      categoria.parametros.forEach(parametro => {
-        const nome = typeof parametro === 'string' ? parametro : parametro.nome
-        const valor = data[nome] || 'Não avaliado'
-
-        // Verifica se precisa adicionar nova página
-        if (yPos > doc.internal.pageSize.getHeight() - 20) {
-          doc.addPage()
-          yPos = 20
-        }
-
-        doc.text(`${nome}: ${valor}`, 20, yPos)
-        yPos += 7
-      })
-      yPos += 10
-    })
-
-    // Observações
-    if (observacoes) {
-      if (yPos > doc.internal.pageSize.getHeight() - 40) {
-        doc.addPage()
-        yPos = 20
+      // Função para adicionar cabeçalho em cada página
+      const addHeader = () => {
+        // Adiciona a logo
+        doc.addImage(logoDataUrl, 'PNG', margin, yPos - 5, 30, 15)
+        
+        // Data no canto superior direito
+        doc.setFontSize(10)
+        doc.setFont('helvetica', 'normal')
+        const dataAtual = new Date().toLocaleDateString('pt-BR')
+        doc.text(dataAtual, pageWidth - margin, yPos + 5, { align: 'right' })
+        
+        yPos += 25
       }
 
-      doc.setFontSize(14)
-      doc.text('Observações', 20, yPos)
-      yPos += 10
+      // Função para adicionar rodapé
+      const addFooter = (pageNumber: number) => {
+        const footerY = pageHeight - margin
 
-      doc.setFontSize(12)
-      const linhas = doc.splitTextToSize(observacoes, doc.internal.pageSize.getWidth() - 40)
-      linhas.forEach((linha: string) => {
-        if (yPos > doc.internal.pageSize.getHeight() - 20) {
-          doc.addPage()
-          yPos = 20
+        // Linha divisória
+        doc.setDrawColor(200, 200, 200)
+        doc.line(margin, footerY - 15, pageWidth - margin, footerY - 15)
+
+        // Dados do profissional
+        doc.setFontSize(9)
+        doc.setTextColor(100, 100, 100) // Cinza
+        
+        // Nome e registro do profissional
+        if (profissional.nome || profissional.registro) {
+          doc.setFont('helvetica', 'normal')
+          const profissionalText = `${profissional.nome}${profissional.registro ? ` - MT ${profissional.registro}` : ''}`
+          doc.text(profissionalText, margin, footerY - 5)
         }
-        doc.text(linha, 20, yPos)
-        yPos += 7
+
+        // Número da página
+        doc.text(`Página ${pageNumber}`, pageWidth - margin, footerY - 5, { align: 'right' })
+        
+        // Reseta a cor do texto para preto
+        doc.setTextColor(0, 0, 0)
+      }
+
+      // Adiciona cabeçalho
+      addHeader()
+
+      // Título do documento
+      doc.setFontSize(16)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Avaliação Musicoterapêutica', pageWidth / 2, yPos, { align: 'center' })
+      yPos += 20
+
+      // Informações do paciente em uma caixa
+      doc.setDrawColor(220, 220, 220)
+      doc.setFillColor(250, 250, 250)
+      const infoBoxHeight = 30
+      doc.roundedRect(margin, yPos, pageWidth - 2 * margin, infoBoxHeight, 3, 3, 'FD')
+      
+      doc.setFontSize(12)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Paciente:', margin + 5, yPos + 12)
+      doc.setFont('helvetica', 'normal')
+      doc.text(patient.nome, margin + 50, yPos + 12)
+      
+      doc.setFont('helvetica', 'bold')
+      doc.text('Data:', margin + 5, yPos + 24)
+      doc.setFont('helvetica', 'normal')
+      doc.text(new Date().toLocaleDateString('pt-BR'), margin + 50, yPos + 24)
+      
+      yPos += infoBoxHeight + 20
+
+      // Título dos resultados
+      checkNewPage(40)
+      doc.setFontSize(14)
+      doc.setFont('helvetica', 'bold')
+      doc.text('Resultados da Escala de Avaliação TEA', pageWidth / 2, yPos, { align: 'center' })
+      yPos += 15
+
+      // Configurações da tabela
+      const colWidths = {
+        categoria: Math.max((pageWidth - 2 * margin) * 0.35, 70),
+        pontos: 25,
+        total: 25,
+        percentual: 30,
+        classificacao: 50
+      }
+      const rowHeight = 12
+      const tableWidth = Object.values(colWidths).reduce((a, b) => a + b, 0)
+      const startX = (pageWidth - tableWidth) / 2
+
+      // Função para desenhar linha da tabela
+      const drawTableLine = (y: number) => {
+        doc.setDrawColor(200, 200, 200)
+        doc.line(startX, y, startX + tableWidth, y)
+      }
+
+      // Cabeçalho da tabela
+      doc.setFillColor(240, 240, 240)
+      doc.rect(startX, yPos, tableWidth, rowHeight, 'F')
+      drawTableLine(yPos)
+      drawTableLine(yPos + rowHeight)
+      
+      doc.setFontSize(10)
+      doc.setFont('helvetica', 'bold')
+      let currentX = startX
+      
+      // Textos do cabeçalho
+      const headers = [
+        { text: 'Categoria', width: colWidths.categoria },
+        { text: 'Pontos', width: colWidths.pontos },
+        { text: 'Total', width: colWidths.total },
+        { text: '%', width: colWidths.percentual },
+        { text: 'Classificação', width: colWidths.classificacao }
+      ]
+      
+      headers.forEach(header => {
+        doc.text(header.text, currentX + 5, yPos + 8)
+        doc.line(currentX, yPos, currentX, yPos + rowHeight)
+        currentX += header.width
       })
+      doc.line(currentX, yPos, currentX, yPos + rowHeight)
+      
+      yPos += rowHeight
+
+      // Dados da tabela
+      doc.setFont('helvetica', 'normal')
+      let isGray = false
+      
+      ESCALA_DEMUCA.forEach(categoria => {
+        if (checkNewPage(rowHeight)) {
+          // Se adicionar nova página, redesenha o cabeçalho da tabela
+          addHeader()
+          yPos += 10
+        }
+
+        // Cor de fundo alternada
+        if (isGray) {
+          doc.setFillColor(248, 248, 248)
+          doc.rect(startX, yPos, tableWidth, rowHeight, 'F')
+        }
+        isGray = !isGray
+
+        const dadosCategoria: Record<string, string> = {}
+        categoria.parametros.forEach(param => {
+          const nomeParam = typeof param === 'string' ? param : param.nome
+          dadosCategoria[nomeParam] = data[nomeParam]
+        })
+
+        const resultado = calcularResultadosCategoria(categoria.categoria, dadosCategoria)
+        
+        // Escreve os dados da linha
+        currentX = startX
+        
+        // Categoria (com quebra de linha se necessário)
+        const categoriaText = doc.splitTextToSize(categoria.categoria, colWidths.categoria - 10)
+        const textHeight = categoriaText.length * 5
+        const textY = yPos + (rowHeight - textHeight) / 2 + 5
+        doc.text(categoriaText, currentX + 5, textY)
+        currentX += colWidths.categoria
+        
+        // Outros dados
+        const dados = [
+          resultado.pontos.toString(),
+          resultado.total.toString(),
+          resultado.percentual.toFixed(1) + '%',
+          classificarDesempenho(resultado.percentual)
+        ]
+        
+        dados.forEach((valor, index) => {
+          const width = [colWidths.pontos, colWidths.total, colWidths.percentual, colWidths.classificacao][index]
+          doc.text(valor, currentX + 5, yPos + 8)
+          doc.line(currentX, yPos, currentX, yPos + rowHeight)
+          currentX += width
+        })
+        
+        doc.line(currentX, yPos, currentX, yPos + rowHeight)
+        drawTableLine(yPos + rowHeight)
+        
+        yPos += rowHeight
+      })
+
+      // Observações
+      if (observacoes) {
+        if (checkNewPage(60)) {
+          addHeader()
+        }
+        yPos += 20
+        
+        // Caixa de observações
+        doc.setDrawColor(220, 220, 220)
+        doc.setFillColor(250, 250, 250)
+        const obsBoxHeight = 50
+        doc.roundedRect(margin, yPos, pageWidth - 2 * margin, obsBoxHeight, 3, 3, 'FD')
+        
+        doc.setFont('helvetica', 'bold')
+        doc.text('Observações:', margin + 5, yPos + 12)
+        doc.setFont('helvetica', 'normal')
+        
+        // Quebra o texto das observações em linhas
+        const obsLines = doc.splitTextToSize(observacoes, pageWidth - 2 * margin - 10)
+        doc.text(obsLines, margin + 5, yPos + 24)
+      }
+
+      // Adiciona rodapé em todas as páginas
+      const totalPages = doc.internal.getNumberOfPages()
+      for (let i = 1; i <= totalPages; i++) {
+        doc.setPage(i)
+        addFooter(i)
+      }
+
+      // Salva o PDF
+      doc.save(`avaliacao_${patient.nome.toLowerCase().replace(/\s+/g, '_')}.pdf`)
+    } catch (error) {
+      console.error(error)
     }
-
-    // Salva o PDF
-    doc.save(`avaliacao_${patient.name.toLowerCase().replace(/\s+/g, '_')}.pdf`)
   }
 
   return (
     <button
       onClick={handleDownload}
-      className="px-3 py-1.5 text-sm bg-green-600 text-white rounded-md hover:bg-green-700 flex items-center gap-2"
+      className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
     >
-      <DocumentArrowDownIcon className="h-4 w-4" />
       Exportar PDF
     </button>
   )
+}
+
+// Função para calcular resultados por categoria
+const calcularResultadosCategoria = (categoria: string, dados: Record<string, string>) => {
+  let total = 0
+  let pontos = 0
+  
+  // Pega a configuração da escala para a categoria
+  const configCategoria = ESCALA_DEMUCA.find(c => c.categoria === categoria)
+  if (!configCategoria) return { pontos: 0, total: 0, percentual: 0 }
+
+  // Mapeia os parâmetros com seus multiplicadores
+  const parametrosComMultiplicador = configCategoria.parametros.map(p => {
+    if (typeof p === 'string') return { nome: p, multiplicador: 1 }
+    return p
+  })
+
+  // Calcula os pontos
+  parametrosComMultiplicador.forEach(param => {
+    const valor = dados[param.nome]
+    if (valor) {
+      total += 2 * param.multiplicador // O total máximo possível
+      
+      let pontosBase = 0
+      switch (valor) {
+        case 'nao':
+          pontosBase = configCategoria.escala.nao
+          break
+        case 'pouco':
+          pontosBase = configCategoria.escala.pouco
+          break
+        case 'muito':
+          pontosBase = configCategoria.escala.muito
+          break
+      }
+      
+      pontos += pontosBase * param.multiplicador
+    }
+  })
+
+  const percentual = total > 0 ? (pontos / total) * 100 : 0
+  return { pontos, total, percentual }
 }

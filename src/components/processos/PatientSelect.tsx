@@ -21,6 +21,8 @@ export function PatientSelect({ onSelect, selectedId, disabled, className = '' }
     )
   }
 
+  console.log('Todos os pacientes:', patients) // Debug log
+
   return (
     <div className="w-full space-y-1">
       <label className="block text-xs sm:text-sm font-medium text-gray-700">
@@ -28,10 +30,13 @@ export function PatientSelect({ onSelect, selectedId, disabled, className = '' }
       </label>
       <select
         value={selectedId || ''}
-        onChange={(e: React.ChangeEvent<HTMLSelectElement>) => {
+        onChange={(e) => {
           const selectedValue = e.target.value
           const patient = selectedValue ? patients.find(p => p.id === selectedValue) : null
-          onSelect(patient || null)
+          console.log('Paciente selecionado:', patient) // Debug log
+          if (typeof onSelect === 'function') {
+            onSelect(patient)
+          }
         }}
         disabled={disabled}
         className={`
@@ -43,14 +48,14 @@ export function PatientSelect({ onSelect, selectedId, disabled, className = '' }
           ${className}
         `}
       >
-        <option value="" className="text-xs sm:text-sm">Selecione um paciente</option>
+        <option value="">Selecione um paciente</option>
         {patients.map((patient) => (
           <option 
             key={patient.id} 
-            value={patient.id} 
+            value={patient.id}
             className="text-xs sm:text-sm"
           >
-            {patient.name} ({new Date(patient.dateOfBirth).toLocaleDateString()})
+            {patient.nome}
           </option>
         ))}
       </select>

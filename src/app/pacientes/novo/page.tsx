@@ -10,9 +10,9 @@ export default function NovoPacientePage() {
   const router = useRouter()
   const { addPatient } = usePatients()
   const [formData, setFormData] = useState({
-    name: '',
-    dateOfBirth: '',
-    phone: '',
+    nome: '',
+    dataNascimento: '',
+    telefone: '',
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -20,11 +20,9 @@ export default function NovoPacientePage() {
 
     const newPatient: Patient = {
       id: crypto.randomUUID(),
-      name: formData.name,
-      dateOfBirth: new Date(formData.dateOfBirth),
-      contactInfo: {
-        phone: formData.phone,
-      },
+      nome: formData.nome,
+      dataNascimento: new Date(formData.dataNascimento),
+      telefone: formData.telefone,
       therapistId: '1',
       status: 'active',
       createdAt: new Date()
@@ -49,10 +47,10 @@ export default function NovoPacientePage() {
               </label>
               <input
                 type="text"
+                value={formData.nome}
+                onChange={(e) => setFormData({ ...formData, nome: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
-                className="w-full p-2 border rounded-lg"
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
 
@@ -62,10 +60,10 @@ export default function NovoPacientePage() {
               </label>
               <input
                 type="date"
+                value={formData.dataNascimento}
+                onChange={(e) => setFormData({ ...formData, dataNascimento: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 required
-                className="w-full p-2 border rounded-lg"
-                value={formData.dateOfBirth}
-                onChange={(e) => setFormData(prev => ({ ...prev, dateOfBirth: e.target.value }))}
               />
             </div>
 
@@ -75,26 +73,26 @@ export default function NovoPacientePage() {
               </label>
               <input
                 type="tel"
-                required
+                value={formData.telefone}
+                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                 placeholder="(00) 00000-0000"
-                className="w-full p-2 border rounded-lg"
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                required
               />
             </div>
           </div>
 
-          <div className="flex justify-end gap-4 pt-4">
+          <div className="flex justify-end gap-3">
             <button
               type="button"
               onClick={() => router.back()}
-              className="px-4 py-2 text-sm border rounded-lg hover:bg-gray-50"
+              className="px-4 py-2 text-sm border rounded-md hover:bg-gray-50"
             >
               Cancelar
             </button>
             <button
               type="submit"
-              className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700"
+              className="px-4 py-2 text-sm bg-indigo-600 text-white rounded-md hover:bg-indigo-700"
             >
               Salvar
             </button>
@@ -103,4 +101,4 @@ export default function NovoPacientePage() {
       </Card>
     </div>
   )
-} 
+}

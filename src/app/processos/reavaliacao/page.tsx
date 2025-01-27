@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { Card } from '@/components/ui/Card'
 import { PatientSelect } from '@/components/processos/PatientSelect'
@@ -15,61 +15,72 @@ export default function ReavaliacaoPage() {
   const router = useRouter()
   const [selectedPatient, setSelectedPatient] = useState<Patient | null>(null)
 
+  const calculateAge = (birthDate: string | undefined) => {
+    if (!birthDate) return ''
+    const today = new Date()
+    const birth = new Date(birthDate)
+    let age = today.getFullYear() - birth.getFullYear()
+    const monthDiff = today.getMonth() - birth.getMonth()
+    
+    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
+      age--
+    }
+    
+    return age.toString()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 py-4 sm:py-8">
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 md:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center mb-6">
           <Logo size="sm" />
         </div>
 
-        <div className="max-w-4xl mx-auto py-6">
+        <div className="max-w-4xl mx-auto">
           <Card>
-            <div className="p-6">
-              <h1 className="text-2xl font-bold text-gray-900 mb-6">Reavaliação Musicoterapêutica</h1>
+            <div className="p-4 sm:p-6">
+              <h1 className="text-xl sm:text-2xl font-bold text-gray-900 mb-6">Reavaliação Musicoterapêutica</h1>
               
               <div className="space-y-6">
                 <div>
-                  <div className="flex items-end gap-4">
-                    <div className="flex-1">
-                      <PatientSelect
-                        onSelect={setSelectedPatient}
-                        selectedId={selectedPatient?.id}
-                      />
-                    </div>
-                    <Link
-                      href="/pacientes/novo"
-                      className="px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 inline-flex items-center gap-2"
-                    >
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-5 w-5"
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                      >
-                        <path
-                          fillRule="evenodd"
-                          d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z"
-                          clipRule="evenodd"
-                        />
-                      </svg>
-                      Novo Paciente
-                    </Link>
+                  <label className="block text-base sm:text-lg font-medium text-gray-700 mb-2">
+                    Selecione o Paciente
+                  </label>
+                  <div className="relative">
+                    <PatientSelect
+                      onSelect={setSelectedPatient}
+                      selectedId={selectedPatient?.id}
+                      className="w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-base sm:text-lg text-gray-900 focus:border-indigo-500 focus:ring-indigo-500"
+                    />
                   </div>
+
+                  {selectedPatient && (
+                    <div className="mt-4 p-4 bg-gray-50 rounded-lg space-y-2">
+                      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+                        <div className="text-base sm:text-lg text-gray-700">
+                          <span className="font-medium">Paciente:</span>{' '}
+                          <span className="text-gray-900">{selectedPatient.nome}</span>
+                        </div>
+                        <div className="text-base sm:text-lg text-gray-700 mt-2 sm:mt-0">
+                          <span className="font-medium">Idade:</span>{' '}
+                          <span className="text-gray-900">{calculateAge(selectedPatient.dataNascimento)} anos</span>
+                        </div>
+                      </div>
+                      <div className="text-base sm:text-lg text-gray-700">
+                        <span className="font-medium">Data de Nascimento:</span>{' '}
+                        <span className="text-gray-900">
+                          {selectedPatient.dataNascimento ? new Date(selectedPatient.dataNascimento).toLocaleDateString('pt-BR') : 'Não informado'}
+                        </span>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 {selectedPatient && (
-                  <div className="mt-6">
-                    <h2 className="text-lg font-semibold text-gray-900 mb-4">
-                      Reavaliação de {selectedPatient.name}
-                    </h2>
-                    <ReavaliacaoForm patient={selectedPatient} />
-                  </div>
-                )}
-
-                {!selectedPatient && (
-                  <div className="text-center py-6 text-gray-500">
-                    Selecione um paciente para iniciar a reavaliação musicoterapêutica
-                  </div>
+                  <ReavaliacaoForm 
+                    patient={selectedPatient} 
+                    idade={calculateAge(selectedPatient.dataNascimento)} 
+                  />
                 )}
               </div>
             </div>
@@ -80,7 +91,7 @@ export default function ReavaliacaoPage() {
   )
 }
 
-function ReavaliacaoForm({ patient }: { patient: Patient }) {
+function ReavaliacaoForm({ patient, idade }: { patient: Patient, idade: string }) {
   const router = useRouter()
   const { addReavaliacao } = useReavaliacoes()
   const [formData, setFormData] = useState<Record<string, string | string[]>>({})
@@ -221,6 +232,7 @@ function ReavaliacaoForm({ patient }: { patient: Patient }) {
         <ReavaliacaoPDF 
           patient={patient}
           data={formData}
+          idade={idade}
         />
       </div>
     </form>

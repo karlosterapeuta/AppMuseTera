@@ -1,42 +1,23 @@
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
-import { PrismaClient } from '@prisma/client'
-import { supabase } from '@/lib/supabaseClient'
-
-const prisma = new PrismaClient()
 
 export async function GET() {
   try {
-    // Teste do Prisma
-    const userCount = await prisma.user.count()
-    
-    // Teste do Supabase
-    const { data: version, error } = await supabase
-      .from('_prisma_migrations')
-      .select('*')
-      .limit(1)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+    )
+
+    const { data, error } = await supabase.from('_prisma_migrations').select('*').limit(1)
 
     if (error) {
-      throw error
+      console.error('Erro ao conectar com Supabase:', error)
+      return NextResponse.json({ success: false, error: error.message })
     }
 
-    return NextResponse.json({
-      status: 'success',
-      prisma: {
-        connected: true,
-        userCount
-      },
-      supabase: {
-        connected: true,
-        version
-      }
-    })
+    return NextResponse.json({ success: true, data })
   } catch (error) {
-    console.error('Connection test failed:', error)
-    return NextResponse.json({
-      status: 'error',
-      error: error instanceof Error ? error.message : 'Unknown error'
-    }, { status: 500 })
-  } finally {
-    await prisma.$disconnect()
+    console.error('Erro ao testar conexão:', error)
+    return NextResponse.json({ success: false, error: String(error) })
   }
 }

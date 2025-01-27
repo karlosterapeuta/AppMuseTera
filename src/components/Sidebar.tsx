@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import { Logo } from '@/components/Logo'
 import { 
   HomeIcon, 
   UserGroupIcon, 
@@ -41,10 +42,8 @@ export default function Sidebar() {
 
   return (
     <aside className="w-64 bg-indigo-800 text-white h-screen flex flex-col">
-      <div className="p-6">
-        <div className="flex items-center px-4">
-          <span className="text-xl font-semibold text-white">MuseTera</span>
-        </div>
+      <div className="p-4">
+        <Logo size="sm" showText={false} darkMode={true} />
       </div>
 
       <nav className="flex-1 px-4 space-y-8">

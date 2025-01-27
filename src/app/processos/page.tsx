@@ -2,7 +2,6 @@
 
 import { Card } from '@/components/ui/Card'
 import { useRouter } from 'next/navigation'
-import { Logo } from '@/components/Logo'
 import Link from 'next/link'
 import { 
   ClipboardDocumentListIcon, 
@@ -73,10 +72,10 @@ const processosFuncoes = [
   },
   {
     id: 'relatorio',
-    title: 'Relatório',
-    description: 'Documentação das sessões',
+    title: 'Relatórios',
+    description: 'Gere relatórios detalhados sobre o progresso do paciente',
     icon: DocumentDuplicateIcon,
-    href: '/relatorios/novo',
+    href: '/processos/relatorios',
     features: [
       'Registro detalhado',
       'Modelos pré-prontos',
@@ -89,21 +88,24 @@ export default function ProcessosPage() {
   const router = useRouter()
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <Logo size="md" />
-        </div>
+    <div className="min-h-screen bg-gray-50">
+      <div className="py-8">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-8">
+            <h1 className="text-3xl font-bold text-gray-900">Processos Terapêuticos</h1>
+            <p className="mt-2 text-gray-600">Gerencie todos os processos terapêuticos dos seus pacientes</p>
+          </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {processosFuncoes.map((funcao) => (
-            <Link key={funcao.id} href={funcao.href}>
-              <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-                <h2 className="text-xl font-semibold mb-2">{funcao.title}</h2>
-                <p className="text-gray-600">{funcao.description}</p>
-              </Card>
-            </Link>
-          ))}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {processosFuncoes.map((funcao) => (
+              <Link key={funcao.id} href={funcao.href}>
+                <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
+                  <h2 className="text-xl font-semibold mb-2">{funcao.title}</h2>
+                  <p className="text-gray-600">{funcao.description}</p>
+                </Card>
+              </Link>
+            ))}
+          </div>
         </div>
       </div>
     </div>

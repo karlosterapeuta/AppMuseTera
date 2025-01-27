@@ -6,16 +6,28 @@ export function usePatients() {
   const [loading, setLoading] = useState(true)
 
   const loadPatients = () => {
-    const savedPatients = JSON.parse(localStorage.getItem('patients') || '[]')
-    
-    const formattedPatients = savedPatients.map((patient: any) => ({
-      ...patient,
-      dateOfBirth: new Date(patient.dateOfBirth),
-      createdAt: new Date(patient.createdAt)
-    }))
+    try {
+      const savedPatients = JSON.parse(localStorage.getItem('patients') || '[]')
+      console.log('Pacientes carregados do localStorage:', savedPatients) // Debug log
+      
+      const formattedPatients = savedPatients.map((patient: any) => ({
+        id: patient.id,
+        nome: patient.nome,
+        dataNascimento: new Date(patient.dataNascimento),
+        telefone: patient.telefone || '',
+        therapistId: patient.therapistId,
+        status: patient.status,
+        createdAt: new Date(patient.createdAt)
+      }))
 
-    setPatients(formattedPatients)
-    setLoading(false)
+      console.log('Pacientes formatados:', formattedPatients) // Debug log
+      setPatients(formattedPatients)
+    } catch (error) {
+      console.error('Erro ao carregar pacientes:', error)
+      setPatients([])
+    } finally {
+      setLoading(false)
+    }
   }
 
   const addPatient = (newPatient: Patient) => {
@@ -57,4 +69,4 @@ export function usePatients() {
     deletePatient,
     refreshPatients: loadPatients
   }
-} 
+}

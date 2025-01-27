@@ -1,13 +1,23 @@
-import './globals.css'
 import { Inter } from 'next/font/google'
+import './globals.css'
+import { Toaster } from 'react-hot-toast'
 import { Providers } from '@/components/providers'
 import { LayoutClient } from '@/components/LayoutClient'
-import { SidebarProvider } from '@/contexts/SidebarContext'
-import { metadata } from './layout.config'
 
-const inter = Inter({ subsets: ['latin'] })
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  preload: true,
+  adjustFontFallback: true
+})
 
-export { metadata }
+export const metadata = {
+  title: 'Sistema de Gerenciamento',
+  description: 'Sistema de Gerenciamento para Musicoterapeutas',
+  icons: {
+    icon: '/favicon.ico',
+  },
+}
 
 export default function RootLayout({
   children,
@@ -18,12 +28,11 @@ export default function RootLayout({
     <html lang="pt-BR">
       <body className={inter.className}>
         <Providers>
-          <SidebarProvider>
-            <LayoutClient>
-              {children}
-            </LayoutClient>
-          </SidebarProvider>
+          <LayoutClient>
+            {children}
+          </LayoutClient>
         </Providers>
+        <Toaster position="top-right" />
       </body>
     </html>
   )
