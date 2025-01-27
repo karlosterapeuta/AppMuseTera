@@ -1,7 +1,12 @@
 {
-  "name": "musicoterapia-app",
+  "name": "app-muse-tera",
   "version": "0.1.0",
   "private": true,
+  "author": {
+    "name": "José Carlos Batista",
+    "email": "josecarlos@musetra.com"
+  },
+  "description": "Sistema de Avaliação para Musicoterapia",
   "engines": {
     "node": ">=20.10.0"
   },
