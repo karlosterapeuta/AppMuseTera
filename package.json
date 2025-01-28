@@ -13,7 +13,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "npm ci && tsc --version && next build",
-    "start": "next start -p $PORT",
+    "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "postinstall": "npx prisma generate"
   },
