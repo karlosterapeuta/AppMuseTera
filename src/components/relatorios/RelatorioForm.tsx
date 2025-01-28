@@ -1,13 +1,14 @@
 'use client'
 
 import { useState } from 'react'
+import { useRouter } from 'next/navigation'
+import { useSession } from 'next-auth/react'
+import { Card } from '@/components/ui/Card'
 import { jsPDF } from 'jspdf'
-import { Card } from '@/components/ui/card'
 import { toast } from 'react-hot-toast'
 import { PatientSelect } from '../processos/PatientSelect'
 import { Patient } from '@/types'
 import { formatarData } from '@/utils/formatters'
-import { useRouter } from 'next/router'
 
 const TIPOS_RELATORIO = [
   { id: 'sessao', label: 'Relatório de Sessão' },
