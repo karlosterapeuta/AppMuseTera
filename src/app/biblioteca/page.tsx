@@ -3,6 +3,7 @@
 import { Card } from '@/components/ui/Card'
 import { Disclosure } from '@headlessui/react'
 import { ChevronUpIcon } from '@heroicons/react/24/outline'
+import EmotionalAssessment from '@/components/hawkins/EmotionalAssessment'
 
 const musicCategories = {
   chiptunes: {
@@ -128,53 +129,93 @@ const musicCategories = {
 export default function BibliotecaPage() {
   return (
     <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold mb-8">Biblioteca Musical para TEA</h1>
-      
-      <div className="space-y-6">
-        <div className="bg-white rounded-lg shadow-lg p-6">
-          <p className="text-gray-700 leading-relaxed mb-4">
-            Nossa biblioteca musical foi especialmente curada para auxiliar no desenvolvimento e bem-estar de crianças com TEA (Transtorno do Espectro Autista). 
-            Cada música foi selecionada considerando suas características específicas e benefícios terapêuticos.
-          </p>
+      <div className="space-y-8">
+        {/* Seção Hawkins */}
+        <div className="mb-6">
+          <h1 className="text-2xl font-bold">Hawkins</h1>
+          <div className="mt-4 bg-white rounded-lg shadow p-6">
+            <p className="text-gray-700 leading-relaxed">
+              A escala "Níveis de consciência de Hawkins" foi desenvolvida pelo psiquiatra David R. Hawkins. 
+              Esta metodologia inovadora é capaz de medir a frequência do campo vibracional de pessoas, filmes, 
+              documentos, criando uma escala abrangente de estados de consciência.
+            </p>
+            <div className="mt-4 bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">Como funciona?</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700">
+                <li>Selecione seu estado emocional atual no menu</li>
+                <li>Visualize a frequência correspondente em Hz</li>
+                <li>Explore a descrição detalhada do estado</li>
+                <li>Receba recomendações musicais personalizadas</li>
+              </ul>
+            </div>
+            <div className="mt-4 text-sm text-gray-600">
+              Use esta ferramenta para:
+              <ul className="list-disc list-inside mt-2 space-y-1">
+                <li>Avaliar seu estado emocional atual</li>
+                <li>Compreender diferentes níveis de consciência</li>
+                <li>Receber sugestões musicais terapêuticas</li>
+                <li>Acompanhar sua evolução ao longo do tempo</li>
+              </ul>
+            </div>
+          </div>
           
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-semibold text-blue-800 mb-2">Como utilizar:</h3>
-            <ul className="list-disc list-inside space-y-2 text-gray-700">
-              <li>Escolha a categoria mais adequada para o momento</li>
-              <li>Leia a descrição de cada música para entender seus benefícios</li>
-              <li>Use as músicas em conjunto com atividades terapêuticas</li>
-              <li>Observe as reações e preferências da criança</li>
-            </ul>
+          {/* Avaliação Emocional de Hawkins */}
+          <div className="mt-6">
+            <EmotionalAssessment />
           </div>
         </div>
 
-        {Object.entries(musicCategories).map(([key, category]) => (
-          <Disclosure key={key}>
-            {({ open }) => (
-              <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-                <Disclosure.Button className="w-full px-6 py-4 text-left bg-indigo-50 hover:bg-indigo-100 transition-colors flex justify-between items-center">
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900">{category.title}</h2>
-                    <p className="text-sm text-gray-600 mt-1">{category.description}</p>
-                  </div>
-                  <ChevronUpIcon
-                    className={`${open ? 'transform rotate-180' : ''} w-5 h-5 text-indigo-500`}
-                  />
-                </Disclosure.Button>
-                <Disclosure.Panel className="px-6 py-4">
-                  <div className="space-y-4">
-                    {category.songs.map((song, index) => (
-                      <div key={index} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
-                        <h3 className="font-medium text-gray-900">{song.title}</h3>
-                        <p className="text-gray-600 text-sm mt-1">{song.description}</p>
+        {/* Seção de Músicas para TEA */}
+        <div className="mt-12">
+          <h1 className="text-2xl font-bold mb-6">Músicas Infantis para TEA</h1>
+          
+          <div className="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <p className="text-gray-700 leading-relaxed mb-4">
+              Nossa biblioteca musical foi especialmente curada para auxiliar no desenvolvimento e bem-estar de crianças com TEA (Transtorno do Espectro Autista). 
+              Cada música foi selecionada considerando suas características específicas e benefícios terapêuticos.
+            </p>
+            
+            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+              <h3 className="text-lg font-semibold text-blue-800 mb-2">Como utilizar:</h3>
+              <ul className="list-disc list-inside space-y-2 text-gray-700">
+                <li>Escolha a categoria mais adequada para o momento</li>
+                <li>Leia a descrição de cada música para entender seus benefícios</li>
+                <li>Use as músicas em conjunto com atividades terapêuticas</li>
+                <li>Observe as reações e preferências da criança</li>
+              </ul>
+            </div>
+          </div>
+
+          <div className="space-y-4">
+            {Object.entries(musicCategories).map(([key, category]) => (
+              <Disclosure key={key}>
+                {({ open }) => (
+                  <div className="bg-white rounded-lg shadow-lg overflow-hidden">
+                    <Disclosure.Button className="w-full px-6 py-4 text-left bg-indigo-50 hover:bg-indigo-100 transition-colors flex justify-between items-center">
+                      <div>
+                        <h2 className="text-xl font-semibold text-gray-900">{category.title}</h2>
+                        <p className="text-sm text-gray-600 mt-1">{category.description}</p>
                       </div>
-                    ))}
+                      <ChevronUpIcon
+                        className={`${open ? 'transform rotate-180' : ''} w-5 h-5 text-indigo-500`}
+                      />
+                    </Disclosure.Button>
+                    <Disclosure.Panel className="px-6 py-4">
+                      <div className="space-y-4">
+                        {category.songs.map((song, index) => (
+                          <div key={index} className="border-b border-gray-100 last:border-0 pb-4 last:pb-0">
+                            <h3 className="font-medium text-gray-900">{song.title}</h3>
+                            <p className="text-gray-600 text-sm mt-1">{song.description}</p>
+                          </div>
+                        ))}
+                      </div>
+                    </Disclosure.Panel>
                   </div>
-                </Disclosure.Panel>
-              </div>
-            )}
-          </Disclosure>
-        ))}
+                )}
+              </Disclosure>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
