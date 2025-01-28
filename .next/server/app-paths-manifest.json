@@ -1,8 +1,0 @@
-{
-  "/processos/page": "app/processos/page.js",
-  "/processos/avaliacao/page": "app/processos/avaliacao/page.js",
-  "/api/test-connection/route": "app/api/test-connection/route.js",
-  "/processos/relatorios/page": "app/processos/relatorios/page.js",
-  "/processos/relatorios/sessao/sessao-individual/page": "app/processos/relatorios/sessao/sessao-individual/page.js",
-  "/dashboard/page": "app/dashboard/page.js"
-}
