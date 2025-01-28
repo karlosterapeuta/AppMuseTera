@@ -2,12 +2,12 @@
 
 import * as React from 'react'
 import { useRouter } from 'next/navigation'
-import { Input } from '@/components/ui/input'
-import { Button } from '@/components/ui/button'
-import { Label } from '@/components/ui/label'
-import { Textarea } from '@/components/ui/textarea'
-import { Card, CardContent } from '@/components/ui/card'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/components/ui/Input'
+import { Button } from '@/components/ui/Button'
+import { Label } from '@/components/ui/Label'
+import { Textarea } from '@/components/ui/Textarea'
+import { Card, CardContent } from '@/components/ui/Card'
+import { Checkbox } from '@/components/ui/Checkbox'
 import { useSession } from 'next-auth/react';
 import { pdf } from '@react-pdf/renderer';
 import PDFReport from './components/PDFReport';
