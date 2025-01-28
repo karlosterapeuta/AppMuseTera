@@ -1,29 +1,21 @@
 import { NextResponse } from 'next/server'
-import { prisma } from '@/lib/prisma'
+import prisma from '@/lib/db'
 
 export async function GET() {
-  try {
-    // Verifica a conexão com o banco de dados
-    await prisma.$queryRaw`SELECT 1`
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), 5000)
 
-    return NextResponse.json(
-      {
-        status: 'healthy',
-        timestamp: new Date().toISOString(),
-        database: 'connected',
-        uptime: process.uptime()
-      },
-      { status: 200 }
-    )
+  try {
+    // Tenta uma query simples para verificar a conexão
+    await prisma.$queryRaw`SELECT 1`
+    return NextResponse.json({ status: 'OK' }, { status: 200 })
   } catch (error) {
-    console.error('Health check failed:', error)
+    console.error('Database health check failed:', error)
     return NextResponse.json(
-      {
-        status: 'unhealthy',
-        timestamp: new Date().toISOString(),
-        error: error instanceof Error ? error.message : 'Unknown error'
-      },
-      { status: 500 }
+      { status: 'Database Unavailable', error: error instanceof Error ? error.message : 'Unknown error' },
+      { status: 503 }
     )
+  } finally {
+    clearTimeout(timeout)
   }
 }

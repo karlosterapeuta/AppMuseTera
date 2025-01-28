@@ -1,14 +1,19 @@
-import { PrismaClient as PrismaClientType } from '.prisma/client'
+import { PrismaClient } from '@prisma/client'
 
 const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClientType | undefined
+  prisma: PrismaClient | undefined
 }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClientType({
-  log: ['error', 'warn'],
+export const prisma = globalForPrisma.prisma ?? new PrismaClient({
+  log: ['query', 'info', 'warn', 'error'],
   datasources: {
     db: {
-      url: process.env.DIRECT_URL
+      url: process.env.DATABASE_URL
+    }
+  },
+  __internal: {
+    engine: {
+      enableEngineDebugMode: true
     }
   }
 })
