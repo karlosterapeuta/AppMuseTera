@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: sistema-musetera
+    name: appmusetera
     env: node
     region: oregon
     plan: free
@@ -20,13 +20,13 @@ services:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 3000
+        value: 10000
       - key: DATABASE_URL
         value: postgres://postgres.jztbkimlcrfndooyhohg:elL5xqA3fvL6jITMrkL2G6eFKVD/S6l13lNEwxzDUZtrCToJ/TJzc5dPFny+veARy8ChxRs4ul2JhjTqZ8Dl0g==@aws-0-us-west-1.pooler.supabase.com:5432/postgres
       - key: DIRECT_URL
         value: postgres://postgres.jztbkimlcrfndooyhohg:elL5xqA3fvL6jITMrkL2G6eFKVD/S6l13lNEwxzDUZtrCToJ/TJzc5dPFny+veARy8ChxRs4ul2JhjTqZ8Dl0g==@aws-0-us-west-1.pooler.supabase.com:5432/postgres
       - key: NEXTAUTH_URL
-        value: https://sistema-musetera-2.onrender.com
+        value: https://appmusetera.onrender.com
       - key: NEXTAUTH_SECRET
         value: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imp6dGJraW1sY3JmbmRvb3lob2hnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzcxMDIzODQsImV4cCI6MjA1MjY3ODM4NH0.Q6nTndaG8t4rOp-Gp0Fo8JTGPfVKLeKJ25ml_5HpVxs
       - key: DEBUG
