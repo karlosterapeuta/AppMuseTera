@@ -1,3 +1,7 @@
+const withBundleAnalyzer = require('@next/bundle-analyzer')({
+  enabled: process.env.ANALYZE === 'true'
+})
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   transpilePackages: ['react-big-calendar', 'jspdf', 'html2canvas'],
@@ -24,19 +28,14 @@ const nextConfig = {
   env: {
     PORT: process.env.PORT || '3000'
   },
+  assetPrefix: process.env.NODE_ENV === 'production' ? undefined : '',
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
       '@': './src'
     }
-    config.resolve.fallback = {
-      ...config.resolve.fallback,
-      fs: false,
-      canvas: false,
-      encoding: false
-    }
     return config
   }
 }
 
-module.exports = nextConfig
+module.exports = withBundleAnalyzer(nextConfig)
