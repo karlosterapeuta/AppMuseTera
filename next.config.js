@@ -21,6 +21,9 @@ const nextConfig = {
   distDir: '.next',
   generateEtags: true,
   optimizeFonts: true,
+  env: {
+    PORT: process.env.PORT || '3000'
+  },
   webpack: (config) => {
     config.resolve.alias = {
       ...config.resolve.alias,
