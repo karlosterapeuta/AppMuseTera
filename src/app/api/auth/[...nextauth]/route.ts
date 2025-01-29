@@ -1,12 +1,8 @@
 import NextAuth from 'next-auth'
 import type { AuthOptions, User } from 'next-auth'
 import CredentialsProvider from 'next-auth/providers/credentials'
-import bcrypt from 'bcryptjs'
-import { createClient } from '@supabase/supabase-js'
-
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-const supabase = createClient(supabaseUrl, supabaseKey)
+import { signInWithEmailAndPassword } from 'firebase/auth'
+import { auth } from '@/lib/firebase'
 
 const authOptions: AuthOptions = {
   providers: [
@@ -24,39 +20,29 @@ const authOptions: AuthOptions = {
         }
 
         try {
-          console.log('Buscando usuário:', credentials.email)
-          const { data: user, error } = await supabase
-            .from('User')
-            .select('*')
-            .eq('email', credentials.email.toLowerCase().trim())
-            .single()
+          const userCredential = await signInWithEmailAndPassword(
+            auth,
+            credentials.email,
+            credentials.password
+          )
 
-          if (error || !user) {
+          const user = userCredential.user
+          if (!user || !user.email) {
             console.log('Usuário não encontrado')
             return null
           }
 
-          if (!user.password) {
-            console.log('Senha não definida para o usuário')
-            return null
-          }
-
-          const isValid = await bcrypt.compare(credentials.password, user.password)
-          
-          if (!isValid) {
-            console.log('Senha inválida')
-            return null
-          }
-
-          console.log('Autenticação bem-sucedida')
           return {
-            id: user.id,
+            id: user.uid,
+            name: user.displayName || user.email.split('@')[0] || 'Usuário',
             email: user.email,
-            name: user.name,
-            professionalRegister: user.professionalRegister
+            image: user.photoURL || null,
           }
-        } catch (error) {
-          console.error('Erro durante autenticação:', error)
+        } catch (error: any) {
+          console.error('Erro na autenticação:', error)
+          if (error.code === 'auth/invalid-credential') {
+            console.log('Credenciais inválidas')
+          }
           return null
         }
       }
@@ -66,29 +52,25 @@ const authOptions: AuthOptions = {
     signIn: '/login',
     error: '/login'
   },
-  debug: true,
   session: {
     strategy: 'jwt',
-    maxAge: 30 * 24 * 60 * 60 // 30 dias
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id
-        token.email = user.email
-        token.professionalRegister = user.professionalRegister
       }
       return token
     },
     async session({ session, token }) {
-      if (session.user) {
+      if (token && session.user) {
         session.user.id = token.id as string
-        session.user.email = token.email as string
-        session.user.professionalRegister = token.professionalRegister as string
       }
       return session
     }
   },
+  debug: process.env.NODE_ENV === 'development',
   secret: process.env.NEXTAUTH_SECRET
 }
 
