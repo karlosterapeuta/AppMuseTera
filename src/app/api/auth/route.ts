@@ -1,7 +1,17 @@
 // src/app/api/auth/route.ts
-import { NextResponse } from 'next/server';
+import NextAuth from 'next-auth';
+import GoogleProvider from 'next-auth/providers/google';
+
+export const authOptions = {
+  providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID,
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET,
+    }),
+  ],
+};
 
 export async function GET(request: Request) {
-  // Replace with your actual authentication logic
-  return NextResponse.json({ message: 'Authentication route' });
+  const response = await NextAuth(request, authOptions);
+  return response;
 }
