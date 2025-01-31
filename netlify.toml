@@ -12,10 +12,10 @@
   package = "@netlify/plugin-nextjs"
 
 [[redirects]]
-  from = "/*"
+  from = "/_next/static/*"
   to = "/_next/static/:splat"
   status = 200
-  force = false
+  force = true
   conditions = {Path = "/_next/static/**"}
 
 [[redirects]]
