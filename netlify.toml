@@ -2,7 +2,7 @@
   command = "npm run build"
   publish = ".next"
   functions = "netlify/functions"
-  after_build = "cp _redirects .next/"
+  post_build = "cp _redirects .next/"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
@@ -31,3 +31,5 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
+
+
