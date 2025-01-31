@@ -1,0 +1,18 @@
+{
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "public, max-age=0, must-revalidate"
+        }
+      ]
+    }
+  ],
+  "build": {
+    "env": {
+      "NEXT_PUBLIC_MAX_HEADER_SIZE": "32768"
+    }
+  }
+}
