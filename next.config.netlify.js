@@ -6,21 +6,21 @@ const nextConfig = {
   },
   transpilePackages: ['react-big-calendar', 'moment'],
   experimental: {
-    esmExternals: 'loose'
+    esmExternals: 'loose', // Mantenha "loose" ou altere para "strict" caso necessário
   },
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: false, // Desabilitado para pegar erros de TypeScript durante o build
   },
   eslint: {
-    ignoreDuringBuilds: true
+    ignoreDuringBuilds: false, // Desabilitado para pegar erros de linting durante o build
   },
-  output: 'standalone',
+  output: 'standalone', // Pode manter isso dependendo da configuração de deploy
   poweredByHeader: false,
   compress: true,
-  swcMinify: true,
-  reactStrictMode: true,
+  swcMinify: true, // Deixe ativado para otimização do código
+  reactStrictMode: true, // Ativado para melhores práticas em desenvolvimento, pode ser desativado para depuração
   compiler: {
-    removeConsole: process.env.NODE_ENV === 'production',
+    removeConsole: process.env.NODE_ENV === 'production' ? true : false, // Remover console apenas em produção
   },
 }
 

@@ -2,7 +2,6 @@
   command = "npm run build"
   publish = ".next"
   functions = "netlify/functions"
-  post_build = "cp _redirects .next/"
 
 [build.environment]
   NODE_VERSION = "20.10.0"
@@ -20,9 +19,14 @@
   conditions = {Path = "/_next/static/**"}
 
 [[redirects]]
+  from = "/api/*"
+  to = "/.netlify/functions/:splat"
+  status = 200
+
+[[redirects]]
   from = "/*"
-  to = "/404"
-  status = 404
+  to = "/index.html"
+  status = 200
 
 [[headers]]
   for = "/*"
@@ -31,5 +35,3 @@
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
     Referrer-Policy = "strict-origin-when-cross-origin"
-
-
