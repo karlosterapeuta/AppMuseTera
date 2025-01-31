@@ -8,6 +8,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "next build",
+    "postbuild": "cp ./_redirects ./.next",  // Copia o arquivo _redirects para a pasta .next
     "start": "node .next/standalone/server.js",
     "lint": "next lint",
     "analyze": "ANALYZE=true next build"
